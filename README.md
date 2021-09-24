@@ -1,1 +1,1 @@
-# Third semestr of computer technology
+# Third semester of computer technology
