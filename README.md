@@ -1,2 +1,1 @@
-# sem3
-Computer technology
+# Third semestr of computer technology
