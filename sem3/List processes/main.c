@@ -36,9 +36,9 @@ void createProcess (int num)
             exit(0);
         }
 
-        printf("(%d) started: %d\n", num, pid);
+        printf("(%d) started: %d, parent: %d\n", num, pid, getpid());
         int status = 0;
         wait(&status);
-        printf("(%d) finished: %d\n", num, pid);
+        printf("(%d) finished: %d, parent: %d\n", num, pid, getpid());
     }
 }
