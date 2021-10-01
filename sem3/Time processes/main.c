@@ -50,12 +50,12 @@ int main (int argc, char* argv[])
     {
         while ((clock() - prog_start) / CLOCKS_PER_SEC < lines[i].time);
 
+        int fd[2];
+        pipe(fd);
+
         pid_t pid1 = fork();
         if (pid1 == 0)
         {
-            int fd[2];
-            pipe(fd);
-
             pid_t pid2 = fork();
             if (pid2 == 0)
             {
@@ -86,6 +86,9 @@ int main (int argc, char* argv[])
                 return 0;
             }
         }
+
+        close(fd[0]);
+        close(fd[1]);
     }
 
     deleteLines(lines, lines_num);
