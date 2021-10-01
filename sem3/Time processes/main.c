@@ -53,28 +53,37 @@ int main (int argc, char* argv[])
         pid_t pid1 = fork();
         if (pid1 == 0)
         {
-            execvp(lines[i].tokens[1], lines[i].tokens + 1);
-        }
-        else
-        {
+            int fd[2];
+            pipe(fd);
+
             pid_t pid2 = fork();
             if (pid2 == 0)
             {
                 pid_t pid3 = fork();
                 if (pid3 == 0)
                 {
-                    while (clock() / CLOCKS_PER_SEC < TIMEOUT);
-                    printf("kill: %d\n", pid1);
-                    kill(pid1, SIGINT);
+                    pid_t kill_pid = getpid();
+                    write(fd[1], &kill_pid, sizeof(kill_pid));
+
+                    sleep(TIMEOUT);
+                    printf("kill: %d\n", getppid());
+                    kill(getppid(), SIGINT);
                     return 0;
                 }
                 else
                 {
-                    int status = 0;
-                    waitpid(pid1, &status, WNOHANG);
-                    kill(pid3, SIGINT);
-                    return 0;
+                    execvp(lines[i].tokens[1], lines[i].tokens + 1);
                 }
+            }
+            else
+            {
+                pid_t kill_pid = 0;
+                read(fd[0], &kill_pid, sizeof(kill_pid));
+
+                int status = 0;
+                wait(&status);
+                kill(kill_pid, SIGINT);
+                return 0;
             }
         }
     }
