@@ -48,6 +48,17 @@ int main (int argc, char* argv[])
 
     for (size_t i = 0; i < lines_num; i++)
     {
+<<<<<<< HEAD:sem3/Run processes/main.c
+=======
+        while ((clock() - prog_start) / CLOCKS_PER_SEC < lines[i].time);
+        // кажется sleep(delta_in_seconds); сделает ровно то же самое. отличие будет только в том, что текущий вариант с while будет потреблять много cpu ресурсов.
+
+        int fd[2];
+        pipe(fd);
+
+        // не до конца понял задумку с 3мя fork'ами и kill'ами из двух разных мест. давайте на следующем семинаре обсудим, можно ли как-то упростить схему
+        // ещё протестируйте программу, передав в список команд нечто несуществующее (чтобы execvp не отработал).
+>>>>>>> 097c5d0010eadaf81c7defc463513320ea2600c8:sem3/Time processes/main.c
         pid_t pid1 = fork();
         if (pid1 == 0)
         {
