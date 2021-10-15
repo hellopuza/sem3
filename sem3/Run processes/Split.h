@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void Split (char* string, char* delimeters, char** tokens, size_t* tokens_num)
+void Split (char* string, const char* delimeters, char** tokens, size_t* tokens_num)
 {
     *tokens_num = 0;
     string = strtok(string, delimeters);

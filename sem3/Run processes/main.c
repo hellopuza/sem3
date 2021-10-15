@@ -1,3 +1,5 @@
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
@@ -14,13 +16,13 @@ const size_t MAX_STR_LEN = 10000;
 const size_t TIMEOUT     = 5;
 char const * const DELIMETERS = " \t\n";
 
-
 struct line
 {
     char* str;
     char** tokens;
     size_t tokens_num;
     size_t time;
+    pid_t  pid;
 };
 
 struct line* getLines    (FILE* fp, size_t lines_num);
@@ -44,51 +46,34 @@ int main (int argc, char* argv[])
 
     qsort(lines, lines_num, sizeof(struct line), compareTime);
 
-    clock_t prog_start = clock();
-
     for (size_t i = 0; i < lines_num; i++)
     {
-        while ((clock() - prog_start) / CLOCKS_PER_SEC < lines[i].time);
-
-        int fd[2];
-        pipe(fd);
-
         pid_t pid1 = fork();
         if (pid1 == 0)
         {
             pid_t pid2 = fork();
             if (pid2 == 0)
             {
-                pid_t pid3 = fork();
-                if (pid3 == 0)
-                {
-                    pid_t kill_pid = getpid();
-                    write(fd[1], &kill_pid, sizeof(kill_pid));
-
-                    sleep(TIMEOUT);
-                    printf("kill: %d\n", getppid());
-                    kill(getppid(), SIGINT);
-                    return 0;
-                }
-                else
-                {
-                    execvp(lines[i].tokens[1], lines[i].tokens + 1);
-                }
+                sleep(lines[i].time + TIMEOUT);
+                kill(getppid(), SIGINT);
+                return 0;
             }
             else
             {
-                pid_t kill_pid = 0;
-                read(fd[0], &kill_pid, sizeof(kill_pid));
-
-                int status = 0;
-                wait(&status);
-                kill(kill_pid, SIGINT);
-                return 0;
+                sleep(lines[i].time);
+                execvp(lines[i].tokens[1], lines[i].tokens + 1);
+                printf("wrong command: %s\n", lines[i].tokens[1]);
+                exit(-1);
             }
         }
+        lines[i].pid = pid1;
+    }
 
-        close(fd[0]);
-        close(fd[1]);
+    for (size_t i = 0; i < lines_num; i++)
+    {
+        int status;
+        waitpid(lines[i].pid, &status, WUNTRACED);
+        printf("process %d, completion status: %d\n", lines[i].pid, status);
     }
 
     deleteLines(lines, lines_num);
