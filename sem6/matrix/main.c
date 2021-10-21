@@ -1,5 +1,5 @@
 
-/* Compiled with O3, run using wsl
+/* Compiled with O3, run using wsl, matrix size: 400 - 1400
 threads num |   1      2      3      4      5      6      7      8      9     10     11     12    
   400 time: | 0.033  0.022  0.029  0.014  0.023  0.023  0.027  0.050  0.025  0.050  0.046  0.020 
      boost: | 1.000  1.509  1.164  2.333  1.455  1.422  1.253  0.671  1.348  0.671  0.733  1.629 
