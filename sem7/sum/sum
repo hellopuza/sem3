@@ -1,0 +1,18 @@
+
+while (1)
+{
+    write a, b
+    A(S2, 1)
+    A(S1, -1)
+    read answer
+}
+
+///////////////////////////
+
+while (1)
+{
+    A(S2, -1)
+    read a, b
+    write a + b
+    A(S1, +1)
+}
