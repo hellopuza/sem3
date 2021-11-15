@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+const size_t MAX_PATH_LEN = 1000;
+const size_t MAX_PATH_NUM = 1000;
+
 void findFile(char* filename, char* current_dir, int depth, int* count, char** paths);
 
 int main(int argc, char* argv[])
@@ -16,7 +19,7 @@ int main(int argc, char* argv[])
         int depth = atoi(argv[2]);
 
         int count = 0;
-        char** paths = (char**)calloc(1000, sizeof(char*));
+        char** paths = (char**)calloc(MAX_PATH_NUM, sizeof(char*));
 
         findFile(filename, current_dir, depth, &count, paths);
         if (count)
@@ -52,7 +55,7 @@ void findFile(char* filename, char* current_dir, int depth, int* count, char** p
         {
             if ((strcmp(pDirent->d_name, "..") != 0) && (strcmp(pDirent->d_name, ".") != 0))
             {
-                char* new_dir = (char*)calloc(1024, 1);
+                char* new_dir = (char*)calloc(MAX_PATH_LEN, 1);
                 strcpy(new_dir, current_dir);
                 strcat(new_dir, "/");
                 strcat(new_dir, pDirent->d_name);
@@ -62,17 +65,16 @@ void findFile(char* filename, char* current_dir, int depth, int* count, char** p
                 {
                     closedir(check_dir);
                     findFile(filename, new_dir, depth - 1, count, paths);
+                    free(new_dir);
                 }
                 else
                 {
                     if (strcmp(filename, pDirent->d_name) == 0)
                     {
-                        paths[*count] = (char*)calloc(strlen(new_dir) + 2, 1);
-                        strcpy(paths[*count], new_dir);
+                        paths[*count] = new_dir;
                         (*count)++;
                     }
                 }
-                free(new_dir);
             }
         }
         closedir(pDir);
