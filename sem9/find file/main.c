@@ -74,6 +74,10 @@ void findFile(char* filename, char* current_dir, int depth, int* count, char** p
                         paths[*count] = new_dir;
                         (*count)++;
                     }
+                    else
+                    {
+                        free(new_dir);
+                    }
                 }
             }
         }

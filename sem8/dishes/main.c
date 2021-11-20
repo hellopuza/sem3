@@ -10,14 +10,13 @@
 #define DISHES_NUM   10
 #define LAST_MESSAGE 255
 
-
 #define ASSERT(cond, msg) \
         if (cond)         \
         {                 \
             printf(msg);  \
             exit(-1);     \
         }
-
+        
 const size_t TABLE_LIMIT = 5;
 
 struct Dishes
@@ -146,10 +145,10 @@ void* Dryer(void* arg)
             break;
         }
 
+        TableOperation(1);
         printf("dryer: started drying dishes %ld\n", msg.type);
         sleep(dishes[msg.type].drying_time);
 
         printf("dryer: finished drying\n");
-        TableOperation(1);
     }
 }
