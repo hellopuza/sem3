@@ -8,13 +8,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#define ASSERT(cond, msg) \
-        if (cond)         \
-        {                 \
-            printf(msg);  \
-            exit(-1);     \
-        }
-
 enum NetworkEnum
 {
     SERVER,
@@ -41,10 +34,8 @@ const char NO_DISK  = ' ';
 const char DISK_ONE = 'O';
 const char DISK_TWO = 'X';
 
-
-void makeNetwork(struct Network* network, char* ip_addr);
 void makeClient(struct Network* client, char* ip_addr);
-int makeServer(struct Network* server);
+void makeServer(struct Network* server);
 void connectPlayer(struct Network* network);
 
 void runGame(struct Network* network);
@@ -60,10 +51,16 @@ int updateBoard(char* board, char disk);
 
 int main(int argc, char *argv[])
 {
-    ASSERT((argc < 2), "IP adrress required");
-
     struct Network network;
-    makeNetwork(&network, argv[1]);
+
+    if (argc == 1)
+    {
+        makeServer(&network);
+    }
+    else
+    {
+        makeClient(&network, argv[1]);
+    }
     connectPlayer(&network);
 
     runGame(&network);
@@ -71,21 +68,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void makeNetwork(struct Network* network, char* ip_addr)
-{
-    if (makeServer(network))
-    {
-        bzero(network, sizeof(*network));
-        makeClient(network, ip_addr);
-        network->type = CLIENT;
-    }
-    else
-    {
-        network->type = SERVER;
-    }
-}
-
-int makeServer(struct Network* server)
+void makeServer(struct Network* server)
 {
     bzero(&server->servaddr, sizeof(server->servaddr));
     server->servaddr.sin_family = AF_INET;
@@ -99,17 +82,11 @@ int makeServer(struct Network* server)
     }
     if (bind(server->sockfd, (struct sockaddr*)&server->servaddr, sizeof(server->servaddr)) < 0)
     {
-        if (errno == EADDRINUSE)
-        {
-            return 1;
-        }
-
         perror(NULL);
         close(server->sockfd);
         exit(1);
     }
-
-    return 0;
+    server->type = SERVER;
 }
 
 void makeClient(struct Network* client, char* ip_addr)
@@ -141,6 +118,7 @@ void makeClient(struct Network* client, char* ip_addr)
         close(client->sockfd);
         exit(1);
     }
+    client->type = CLIENT;
 }
 
 void connectPlayer(struct Network* network)
@@ -159,12 +137,25 @@ void connectPlayer(struct Network* network)
             close(network->sockfd);
             exit(1);
         }
+        if (sendto(network->sockfd, &num, sizeof(num), 0, (struct sockaddr*)&network->cliaddr, sizeof(network->cliaddr)) < 0)
+        {
+            perror(NULL);
+            close(network->sockfd);
+            exit(1);
+        }
         break;
     }
     case CLIENT:
     {
         int num = 1;
+        printf("Wrong ip address\n");
         if (sendto(network->sockfd, &num, sizeof(num), 0, (struct sockaddr *)&network->servaddr, sizeof(network->servaddr)) < 0)
+        {
+            perror(NULL);
+            close(network->sockfd);
+            exit(1);
+        }
+        if (recvfrom(network->sockfd, &num, sizeof(num), 0, (struct sockaddr*)NULL, NULL) < 0)
         {
             perror(NULL);
             close(network->sockfd);
